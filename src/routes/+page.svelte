@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>Ross Williams | Complex Systems & AI Researcher</title>
+	<title>Ross Williams | Complex Systems & Computational Modeling</title>
 	<meta name="description" content="PhD Candidate at Virginia Tech researching System Dynamics, Agent-based Modeling, and Generative AI. Explore interactive epidemic models and research publications." />
 </svelte:head>
 
