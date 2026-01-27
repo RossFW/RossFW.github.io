@@ -58,9 +58,9 @@
 		<div class="contact-grid">
 			<div class="contact-info">
 				<p class="contact-intro">
-					I'm always interested in discussing research collaborations,
-					speaking opportunities, or just chatting about complex systems
-					and AI. Feel free to reach out!
+					I'm always interested in discussing potential jobs,
+					research collaborations, speaking opportunities, or just chatting
+					about complex systems and AI. Feel free to reach out!
 				</p>
 
 				<div class="contact-methods">

@@ -30,7 +30,7 @@
 
 		<div class="param-group">
 			<label for="initial">
-				Initial Infected (I<sub>0</sub>)
+				Initial Infected (I0)
 				<span class="param-value">{I0}</span>
 			</label>
 			<input
