@@ -4,7 +4,7 @@
 
 <section class="media section" id="media">
 	<div class="container">
-		<h2 class="section-title">Media & Projects</h2>
+		<h2 class="section-title">Media & Press</h2>
 
 		<div class="media-grid">
 			<div class="video-section card">
@@ -79,7 +79,7 @@
 
 <style>
 	.media {
-		background: var(--bg-secondary);
+		background: var(--bg-primary);
 	}
 
 	.media-grid {

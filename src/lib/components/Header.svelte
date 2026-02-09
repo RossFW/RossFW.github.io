@@ -7,6 +7,7 @@
 		{ label: 'Research', href: '#research' },
 		{ label: 'Interactive Model', href: '#model' },
 		{ label: 'Experience', href: '#experience' },
+		{ label: 'Projects', href: '#projects' },
 		{ label: 'Media', href: '#media' },
 		{ label: 'Contact', href: '#contact' }
 	];

@@ -4,6 +4,7 @@
 	import Research from '$lib/components/Research.svelte';
 	import EpidemicModel from '$lib/components/EpidemicModel/EpidemicModel.svelte';
 	import Experience from '$lib/components/Experience.svelte';
+	import Projects from '$lib/components/Projects.svelte';
 	import Media from '$lib/components/Media.svelte';
 	import Contact from '$lib/components/Contact.svelte';
 </script>
@@ -18,5 +19,6 @@
 <Research />
 <EpidemicModel />
 <Experience />
+<Projects />
 <Media />
 <Contact />
