@@ -42,6 +42,50 @@
 			],
 			accent: '#22d3ee',
 			githubUrl: 'https://github.com/RossFW/Among-Us-IRL'
+		},
+		{
+			title: 'Atlas Conquest Analytics',
+			date: 'February 2026',
+			description: 'A fully static analytics dashboard for Atlas Conquest, a competitive hex-grid deck-builder game. An automated daily pipeline pulls match data from AWS DynamoDB, aggregates stats across time periods and map types, and publishes interactive visualizations to GitHub Pages.',
+			techStack: ['Python', 'JavaScript', 'Chart.js', 'AWS DynamoDB', 'GitHub Actions'],
+			features: [
+				'Automated daily data pipeline via GitHub Actions',
+				'Multi-dimensional aggregation (4 time periods x 4 map filters)',
+				'Interactive sortable tables with debounced search',
+				'Commander matchup heatmap with mirror match tracking',
+				'Card artwork hover previews and deck composition modals',
+				'Colorblind-safe Okabe-Ito color palette'
+			],
+			highlights: [
+				{ label: 'Pages', value: '4' },
+				{ label: 'Pipeline', value: 'Daily' },
+				{ label: 'Hosting', value: 'Static' }
+			],
+			accent: '#f59e0b',
+			githubUrl: 'https://github.com/RossFW/atlas-conquest-analytics',
+			liveUrl: 'https://rossfw.github.io/atlas-conquest-analytics/'
+		},
+		{
+			title: "Where's the Host? Bar Crawl Simulation",
+			date: 'February 2026',
+			description: 'An agent-based model simulating a scavenger-hunt bar crawl along Atlanta\'s Beltline. Groups independently search real bars to find a hidden host, with realistic movement, dwell times, information sharing on encounter, and process-of-elimination deduction — all animated live on an interactive map.',
+			techStack: ['JavaScript', 'Leaflet.js', 'Chart.js', 'HTML/CSS'],
+			features: [
+				'Agent-based simulation with staggered arrivals and random dwell times',
+				'Live animated map visualization via Leaflet.js',
+				'Knowledge sharing and deduction when groups encounter each other',
+				'Configurable parameters (group count, drink time, recognition rate)',
+				'Real-time discovery time and drinks-per-person charts',
+				'Modeled on 7 real Atlanta Beltline bars with actual walking distances'
+			],
+			highlights: [
+				{ label: 'Bars', value: '7' },
+				{ label: 'Model', value: 'ABM' },
+				{ label: 'Viz', value: 'Live Map' }
+			],
+			accent: '#10b981',
+			githubUrl: 'https://github.com/RossFW/Bar-Crawl-Simulation',
+			liveUrl: 'https://rossfw.github.io/Bar-Crawl-Simulation/'
 		}
 	];
 </script>
