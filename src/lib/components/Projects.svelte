@@ -51,15 +51,13 @@
 			features: [
 				'Automated daily data pipeline via GitHub Actions',
 				'Multi-dimensional aggregation (4 time periods x 4 map filters)',
-				'Interactive sortable tables with debounced search',
 				'Commander matchup heatmap with mirror match tracking',
-				'Card artwork hover previews and deck composition modals',
-				'Colorblind-safe Okabe-Ito color palette'
+				'Card artwork hover previews and deck composition modals'
 			],
 			highlights: [
-				{ label: 'Pages', value: '4' },
-				{ label: 'Pipeline', value: 'Daily' },
-				{ label: 'Hosting', value: 'Static' }
+				{ label: 'Matches', value: '3,100+' },
+				{ label: 'Players', value: '202' },
+				{ label: 'Pipeline', value: 'Daily' }
 			],
 			accent: '#f59e0b',
 			githubUrl: 'https://github.com/RossFW/atlas-conquest-analytics',
@@ -68,19 +66,18 @@
 		{
 			title: "Where's the Host? Bar Crawl Simulation",
 			date: 'February 2026',
-			description: 'An agent-based model simulating a scavenger-hunt bar crawl along Atlanta\'s Beltline. Groups independently search real bars to find a hidden host, with realistic movement, dwell times, information sharing on encounter, and process-of-elimination deduction — all animated live on an interactive map.',
+			description: 'A geospatial agent-based model simulating a scavenger-hunt bar crawl along Atlanta\'s Beltline. Built on real-world locations and Google Maps walking times, groups navigate a 1.2-mile route searching for a hidden host — with realistic movement, information sharing, and process-of-elimination deduction animated live on an interactive map.',
 			techStack: ['JavaScript', 'Leaflet.js', 'Chart.js', 'HTML/CSS'],
 			features: [
-				'Agent-based simulation with staggered arrivals and random dwell times',
+				'Geospatial ABM built on real GPS coordinates and Google Maps walk times',
 				'Live animated map visualization via Leaflet.js',
 				'Knowledge sharing and deduction when groups encounter each other',
 				'Configurable parameters (group count, drink time, recognition rate)',
-				'Real-time discovery time and drinks-per-person charts',
-				'Modeled on 7 real Atlanta Beltline bars with actual walking distances'
+				'Real-time discovery time and drinks-per-person charts'
 			],
 			highlights: [
-				{ label: 'Bars', value: '7' },
-				{ label: 'Model', value: 'ABM' },
+				{ label: 'Route', value: '1.2 mi' },
+				{ label: 'Model', value: 'Geo-ABM' },
 				{ label: 'Viz', value: 'Live Map' }
 			],
 			accent: '#10b981',
