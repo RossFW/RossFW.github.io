@@ -1,126 +1,23 @@
 <script>
-	import { onMount } from 'svelte';
-
-	let canvas;
-	let ctx;
-	let particles = [];
-	let animationId;
-
-	const PARTICLE_COUNT = 80;
-	const CONNECTION_DISTANCE = 150;
-	const PARTICLE_SPEED = 0.3;
-
-	class Particle {
-		constructor(width, height) {
-			this.x = Math.random() * width;
-			this.y = Math.random() * height;
-			this.vx = (Math.random() - 0.5) * PARTICLE_SPEED;
-			this.vy = (Math.random() - 0.5) * PARTICLE_SPEED;
-			this.radius = Math.random() * 2 + 1;
-		}
-
-		update(width, height) {
-			this.x += this.vx;
-			this.y += this.vy;
-
-			if (this.x < 0 || this.x > width) this.vx *= -1;
-			if (this.y < 0 || this.y > height) this.vy *= -1;
-		}
-
-		draw(ctx) {
-			ctx.beginPath();
-			ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-			ctx.fillStyle = 'rgba(99, 102, 241, 0.5)';
-			ctx.fill();
-		}
-	}
-
-	function init() {
-		if (!canvas) return;
-		ctx = canvas.getContext('2d');
-		resizeCanvas();
-		createParticles();
-		animate();
-	}
-
-	function resizeCanvas() {
-		if (!canvas) return;
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-	}
-
-	function createParticles() {
-		particles = [];
-		for (let i = 0; i < PARTICLE_COUNT; i++) {
-			particles.push(new Particle(canvas.width, canvas.height));
-		}
-	}
-
-	function drawConnections() {
-		for (let i = 0; i < particles.length; i++) {
-			for (let j = i + 1; j < particles.length; j++) {
-				const dx = particles[i].x - particles[j].x;
-				const dy = particles[i].y - particles[j].y;
-				const distance = Math.sqrt(dx * dx + dy * dy);
-
-				if (distance < CONNECTION_DISTANCE) {
-					const opacity = (1 - distance / CONNECTION_DISTANCE) * 0.3;
-					ctx.beginPath();
-					ctx.moveTo(particles[i].x, particles[i].y);
-					ctx.lineTo(particles[j].x, particles[j].y);
-					ctx.strokeStyle = `rgba(34, 211, 238, ${opacity})`;
-					ctx.lineWidth = 1;
-					ctx.stroke();
-				}
-			}
-		}
-	}
-
-	function animate() {
-		if (!ctx) return;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-		particles.forEach(p => {
-			p.update(canvas.width, canvas.height);
-			p.draw(ctx);
-		});
-
-		drawConnections();
-		animationId = requestAnimationFrame(animate);
-	}
-
-	function handleResize() {
-		resizeCanvas();
-		createParticles();
-	}
-
-	onMount(() => {
-		init();
-		window.addEventListener('resize', handleResize);
-
-		return () => {
-			cancelAnimationFrame(animationId);
-			window.removeEventListener('resize', handleResize);
-		};
-	});
+	import TownBackground from '$lib/components/TownBackground.svelte';
 </script>
 
 <section class="hero" id="hero">
-	<canvas bind:this={canvas} class="particle-canvas"></canvas>
+	<TownBackground />
 
 	<div class="hero-content">
-		<h1>Modeling Complex Systems with Generative AI</h1>
+		<h1>Engineer. Researcher. Builder.</h1>
 		<p class="name">Ross F. Williams</p>
 		<p class="subtitle">
-			PhD Candidate | Virginia Tech | System Dynamics + Generative AI
+			Computational Modeling · Generative AI · Full-Stack Projects
 		</p>
 		<p class="description">
-			Researching how generative AI can help us understand and predict
-			the behavior of complex systems, from epidemic spread to social dynamics.
+			Building AI systems that model the real world: epidemic simulations,
+			real-time analytics pipelines, interactive tools.
 		</p>
 		<div class="hero-buttons">
 			<a href="#research" class="btn btn-primary">Explore Research</a>
-			<a href="#model" class="btn btn-secondary">Interactive Demo</a>
+			<a href="#projects" class="btn btn-secondary">See Projects</a>
 		</div>
 	</div>
 </section>
@@ -136,16 +33,7 @@
 		overflow: hidden;
 	}
 
-	.particle-canvas {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		pointer-events: none;
-	}
-
-	.hero-content {
+.hero-content {
 		position: relative;
 		z-index: 1;
 		text-align: center;

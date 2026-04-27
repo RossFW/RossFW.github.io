@@ -1,26 +1,25 @@
 <script>
 	const projects = [
 		{
-			title: 'Blood on the Clocktower Elo Tracker',
-			date: 'January 2026',
-			description: 'A player rating and statistics tracking system for the social deduction board game Blood on the Clocktower. Tracks Elo ratings, win percentages, and game statistics with analytics dashboards and leaderboards.',
-			techStack: ['JavaScript', 'HTML/CSS', 'Chart.js', 'Supabase', 'Python', 'Tkinter'],
+			title: 'PBetter — Pickleball Analytics',
+			date: 'April 2026',
+			description: 'Computer vision pipeline that turns a ZED 2 stereo camera into a full pickleball analytics system. Detects the ball frame-by-frame with a fine-tuned YOLOv8 model, tracks it in 3D with an Extended Kalman Filter, segments rallies, and writes structured analytics to SQLite — all running on cloud GPUs via Modal.',
+			techStack: ['Python', 'YOLOv8', 'OpenCV', 'Extended Kalman Filter', 'Modal', 'SQLite', 'Streamlit'],
 			features: [
-				'Elo rating system (K=32)',
-				'Game entry with role/alignment tracking',
-				'Analytics dashboards with Chart.js',
-				'Sortable leaderboard',
-				'Storyteller and script filtering',
-				'40+ character roles across multiple scripts'
+				'Fine-tuned YOLOv8 ball detection (76% precision, 58% recall)',
+				'2D pixel-space EKF + stereo 3D triangulation',
+				'BoT-SORT persistent player tracking with pose estimation',
+				'Cloud GPU inference on Modal (T4/A10G)',
+				'Rally segmentation to SQLite analytics schema',
+				'Unified OpenCV workbench with 8 calibration/detection modes'
 			],
 			highlights: [
-				{ label: 'Roles', value: '40+' },
-				{ label: 'Platform', value: 'Web + Desktop' },
-				{ label: 'Database', value: 'Supabase' }
+				{ label: 'Model', value: 'YOLOv8' },
+				{ label: 'Tracking', value: '3D EKF' },
+				{ label: 'Cloud', value: 'Modal GPU' }
 			],
-			accent: '#6366f1',
-			githubUrl: 'https://github.com/RossFW/botc',
-			liveUrl: 'https://rossfw.github.io/botc/botc-web/'
+			accent: '#f472b6',
+			videoUrl: '/videos/pbetter.mp4',
 		},
 		{
 			title: 'Among Us IRL',
@@ -44,9 +43,31 @@
 			githubUrl: 'https://github.com/RossFW/Among-Us-IRL'
 		},
 		{
+			title: 'Blood on the Clocktower Elo Tracker',
+			date: 'January 2026',
+			description: 'A player rating and statistics tracking system for the social deduction board game Blood on the Clocktower. Tracks Elo ratings, win percentages, and game statistics with analytics dashboards and leaderboards.',
+			techStack: ['JavaScript', 'HTML/CSS', 'Chart.js', 'Supabase', 'Python', 'Tkinter'],
+			features: [
+				'Elo rating system (K=32)',
+				'Game entry with role/alignment tracking',
+				'Analytics dashboards with Chart.js',
+				'Sortable leaderboard',
+				'Storyteller and script filtering',
+				'40+ character roles across multiple scripts'
+			],
+			highlights: [
+				{ label: 'Roles', value: '40+' },
+				{ label: 'Platform', value: 'Web + Desktop' },
+				{ label: 'Database', value: 'Supabase' }
+			],
+			accent: '#6366f1',
+			githubUrl: 'https://github.com/RossFW/botc',
+			liveUrl: 'https://rossfw.github.io/botc/botc-web/'
+		},
+		{
 			title: 'Atlas Conquest Analytics',
 			date: 'February 2026',
-			description: 'A fully static analytics dashboard for Atlas Conquest, a competitive hex-grid deck-builder game. An automated daily pipeline pulls match data from AWS DynamoDB, aggregates stats across time periods and map types, and publishes interactive visualizations to GitHub Pages.',
+			description: 'A fully static analytics dashboard for Atlas Conquest, a competitive hex-grid deck-builder game. An automated daily pipeline pulls match data from AWS DynamoDB, aggregates stats across time periods and map types, and publishes interactive visualizations.',
 			techStack: ['Python', 'JavaScript', 'Chart.js', 'AWS DynamoDB', 'GitHub Actions'],
 			features: [
 				'Automated daily data pipeline via GitHub Actions',
@@ -61,7 +82,7 @@
 			],
 			accent: '#f59e0b',
 			githubUrl: 'https://github.com/RossFW/atlas-conquest-analytics',
-			liveUrl: 'https://rossfw.github.io/atlas-conquest-analytics/'
+			liveUrl: 'https://atlas-conquest.com/commanders.html'
 		},
 		{
 			title: "Where's the Host? Bar Crawl Simulation",
@@ -83,6 +104,26 @@
 			accent: '#10b981',
 			githubUrl: 'https://github.com/RossFW/Bar-Crawl-Simulation',
 			liveUrl: 'https://rossfw.github.io/Bar-Crawl-Simulation/'
+		},
+		{
+			title: 'ElizAstro — Personal Astrology App',
+			date: 'March 2026',
+			description: 'A native iOS astrology app built for a friend, featuring natal charts computed from scratch using Meeus astronomical algorithms and the Placidus house system. No external APIs — all planetary positions, transits, retrogrades, and synastry are calculated on-device.',
+			techStack: ['Swift', 'SwiftUI', 'SwiftData', 'Custom Ephemeris', 'iOS'],
+			features: [
+				'Full natal chart with Placidus house system',
+				'Kepler equation solver for accurate planetary positions',
+				'Weekly transit and retrograde forecasting',
+				'Friend profiles with compatibility (synastry) analysis',
+				'All computation on-device, zero external dependencies',
+				'Custom chart wheel SVG renderer'
+			],
+			highlights: [
+				{ label: 'Planets', value: '10-body' },
+				{ label: 'Houses', value: 'Placidus' },
+				{ label: 'Backend', value: 'On-device' }
+			],
+			accent: '#818cf8',
 		}
 	];
 </script>
@@ -99,7 +140,13 @@
 						<span class="project-date">{project.date}</span>
 					</div>
 
-					<p class="project-description">{project.description}</p>
+					{#if project.videoUrl}
+					<div class="project-video">
+						<video src={project.videoUrl} autoplay muted loop playsinline></video>
+					</div>
+				{/if}
+
+				<p class="project-description">{project.description}</p>
 
 					<div class="tech-stack">
 						{#each project.techStack as tech}
@@ -178,6 +225,19 @@
 		white-space: nowrap;
 		flex-shrink: 0;
 		color: var(--project-accent);
+	}
+
+	.project-video {
+		border-radius: var(--radius-md);
+		overflow: hidden;
+		border: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.project-video video {
+		width: 100%;
+		display: block;
+		max-height: 220px;
+		object-fit: cover;
 	}
 
 	.project-description {

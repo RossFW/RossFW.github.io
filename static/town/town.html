@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dewberry Hollow — GABM Dashboard</title>
+
+  <script src="papaparse.min.js"></script>
+  <script src="config.js"></script>
+  <script src="phaser.min.js"></script>
+  <script src="map-layout.js"></script>
+  <script src="agent-schedule.js"></script>
+  <script src="town-render.js"></script>
+  <script src="town-pathfinding.js"></script>
+  <script src="town-agents.js"></script>
+  <script src="town-ui.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f0f15;
+      --bg-card: #181821;
+      --bg-input: #20202c;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.18);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent: #22d3ee;
+      --accent-warm: #f97316;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px 24px;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 1160px;
+      max-width: 100%;
+    }
+
+    /* Header */
+    #header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 0 0 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    #header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    #world-name { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+    #subtitle { font-size: 12px; color: var(--text-muted); }
+
+    #model-display {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+
+    #current-model-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    #current-model-detail { font-size: 11px; color: var(--text-dim); }
+    #infection-level { font-size: 13px; color: var(--text); font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    #agent-counts { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+    /* Hide model selector — locked to Claude Opus 4.5 */
+    #model-selector-row { display: none; }
+
+    /* Scrubber */
+    #scrubber-row {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 6px 0 12px;
+    }
+    #scrubber-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 0 2px;
+    }
+    #scrubber-title { font-style: italic; color: var(--text-dim); }
+    #scrubber {
+      width: 100%;
+      height: 4px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    #scrubber-axis {
+      position: relative;
+      height: 18px;
+      margin-top: 2px;
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #scrubber-axis span {
+      position: absolute;
+      transform: translateX(-50%);
+    }
+
+    /* Game row */
+    #game-row {
+      display: flex;
+      align-items: flex-start;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    #game-container canvas {
+      cursor: default;
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    #bio-panel {
+      width: 260px;
+      min-height: 640px;
+      background: var(--bg-card);
+      border-left: 1px solid var(--border);
+      padding: 16px 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .bio-placeholder {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+      padding-top: 60px;
+      line-height: 1.8;
+      font-style: italic;
+    }
+
+    .bio-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .bio-meta { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
+    .bio-traits { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.6; }
+    .trait {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 1px 6px;
+      font-size: 11px;
+      display: inline-block;
+      margin: 1px;
+      border-radius: 3px;
+    }
+    .bio-decision { font-size: 12px; margin-bottom: 10px; }
+    .bio-reasoning-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+    .bio-reasoning { font-size: 11px; color: var(--text-muted); line-height: 1.6; word-break: break-word; }
+
+    /* Controls */
+    #controls {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .ctrl-btn {
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border-strong);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 6px 14px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .ctrl-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+    #speed-group { display: flex; align-items: center; gap: 4px; }
+    #speed-label { font-size: 11px; color: var(--text-dim); margin-right: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .speed-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 12px;
+      padding: 4px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .speed-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+    .speed-btn:hover:not(.active) { background: var(--bg-input); color: var(--text); }
+
+    #day-counter {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Zoom */
+    #zoom-row {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+    }
+    #zoom-row-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+    #zoom-label { font-size: 11px; color: var(--text-muted); min-width: 36px; font-family: 'JetBrains Mono', monospace; }
+    .zoom-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 2px 12px;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .zoom-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+    /* Hint */
+    #hint {
+      display: none;
+      font-size: 11px;
+      color: var(--text-dim);
+      padding: 4px 0 8px;
+      font-style: italic;
+    }
+
+    /* Agent grid */
+    #agent-grid {
+      display: grid;
+      grid-template-columns: repeat(20, 1fr);
+      gap: 2px;
+      padding: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .agent-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3px 1px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      border-radius: 2px;
+      transition: border-color 0.1s;
+    }
+    .agent-cell:hover { border-color: var(--accent); }
+    .agent-cell-emoji { font-size: 11px; line-height: 1; }
+    .agent-cell-name {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    /* Charts (SVG charts use white bg + black text in original — re-theme) */
+    #chart-section, #model-breakdown {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+    }
+
+    /* Chart background rects: white → dark card */
+    #mobility-curve-chart svg rect[fill="#ffffff"],
+    #model-breakdown svg rect[fill="#ffffff"] {
+      fill: var(--bg-card) !important;
+    }
+
+    /* Grid lines */
+    #mobility-curve-chart svg line[stroke="#eeeeee"],
+    #model-breakdown svg line[stroke="#eeeeee"] {
+      stroke: rgba(255,255,255,0.06) !important;
+    }
+
+    /* Text labels */
+    #mobility-curve-chart svg text[fill="#777"],
+    #model-breakdown svg text[fill="#777"] {
+      fill: var(--text-dim) !important;
+    }
+    #mobility-curve-chart svg text[fill="#555"],
+    #model-breakdown svg text[fill="#555"] {
+      fill: var(--text-muted) !important;
+    }
+    #mobility-curve-chart svg text[fill="#111"],
+    #model-breakdown svg text[fill="#111"] {
+      fill: var(--text) !important;
+    }
+
+    /* Playhead lines */
+    #mobility-curve-chart svg line[stroke="rgba(0,0,0,0.25)"],
+    #model-breakdown svg line[stroke="rgba(0,0,0,0.25)"] {
+      stroke: rgba(255,255,255,0.35) !important;
+    }
+
+    /* Dot strokes on charts (currently white) */
+    #mobility-curve-chart svg circle[stroke="#ccc"] {
+      stroke: rgba(255,255,255,0.5) !important;
+    }
+
+    /* Loading */
+    #loading {
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 60px 20px;
+      font-style: italic;
+    }
+    #error-msg {
+      display: none;
+      text-align: center;
+      font-size: 13px;
+      color: #ef4444;
+      padding: 40px 20px;
+    }
+
+    /* Tooltips */
+    #agent-tooltip {
+      display: none;
+      position: fixed;
+      pointer-events: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.6;
+      white-space: nowrap;
+      z-index: 9999;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    #agent-tooltip .tt-name { font-weight: 600; }
+    #agent-tooltip .tt-health { margin-left: 6px; color: var(--text-muted); }
+
+    .ui-tip {
+      display: none;
+      position: fixed;
+      pointer-events: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: nowrap;
+      z-index: 10000;
+      max-width: 320px;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 1200px) {
+      #app { width: 100%; }
+      #game-row { flex-wrap: wrap; }
+      #game-container { width: 100%; }
+      #game-container canvas { width: 100% !important; height: auto !important; }
+      #bio-panel { width: 100%; min-height: auto; border-left: none; border-top: 1px solid var(--border); max-height: 240px; }
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 12px 8px 24px; }
+      #header-top { flex-direction: column; align-items: flex-start; }
+      #agent-grid { grid-template-columns: repeat(10, 1fr); }
+      #hint, .ui-tip { display: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+<div id="app">
+  <div id="header">
+    <div id="header-top">
+      <span id="world-name">Dewberry Hollow — Risk Responsiveness</span>
+      <span id="subtitle">100 LLM-powered agents respond to rising infection</span>
+    </div>
+    <div id="model-display">
+      <span id="current-model-name">Claude Opus 4.5</span>
+      <span id="current-model-detail">anthropic · reasoning: off</span>
+      <span id="infection-level">Infection: 0.0%</span>
+      <span id="agent-counts">Out: — · Home: —</span>
+    </div>
+  </div>
+
+  <div id="model-selector-row">
+    <select id="model-select"></select>
+  </div>
+
+  <div id="scrubber-row">
+    <div id="scrubber-header">
+      <span id="scrubber-title">Drag to scrub through infection levels — agents react to risk in real time</span>
+      <span id="scrubber-value">0.0% new cases</span>
+    </div>
+    <input type="range" id="scrubber" min="0" max="39" value="0">
+    <div id="scrubber-axis"></div>
+  </div>
+
+  <div id="loading">Loading simulation…</div>
+  <div id="error-msg"></div>
+
+  <div id="game-row">
+    <div id="game-container"></div>
+    <div id="bio-panel">
+      <div class="bio-placeholder">Click or hover an agent<br>to view bio &amp; reasoning</div>
+    </div>
+  </div>
+
+  <div id="controls">
+    <button class="ctrl-btn" id="btn-play-pause">▶ Play</button>
+
+    <div id="speed-group">
+      <span id="speed-label">Speed</span>
+      <button class="speed-btn" data-speed="0.5">½×</button>
+      <button class="speed-btn active" data-speed="1">1×</button>
+      <button class="speed-btn" data-speed="2">2×</button>
+      <button class="speed-btn" data-speed="4">4×</button>
+    </div>
+
+    <div id="day-counter">—</div>
+  </div>
+
+  <div id="zoom-row">
+    <span id="zoom-row-label">Zoom</span>
+    <button class="zoom-btn" id="btn-zoom-out">−</button>
+    <button class="zoom-btn" id="btn-zoom-reset">⌂</button>
+    <button class="zoom-btn" id="btn-zoom-in">+</button>
+    <span id="zoom-label">35%</span>
+  </div>
+
+  <div id="hint">
+    Space play/pause · Click agent to follow · Esc unfollow · Scroll to zoom · Drag to pan
+  </div>
+
+  <div id="agent-grid"></div>
+
+  <div id="chart-section">
+    <div id="mobility-curve-chart" style="width:100%;height:260px"></div>
+  </div>
+
+  <div id="model-breakdown" style="width:100%;margin-top:0"></div>
+</div>
+
+<div id="agent-tooltip"></div>
+<div class="ui-tip" id="ui-tip"></div>
+
+<script>
+  // Build scrubber x-axis tick labels
+  function buildScrubberAxis() {
+    const axis = document.getElementById('scrubber-axis');
+    if (!axis || !CONFIG?.INFECTION_LEVELS) return;
+    const levels = CONFIG.INFECTION_LEVELS;
+    for (let pct = 0; pct <= 7; pct++) {
+      const stepIdx = levels.reduce((best, l, i) =>
+        Math.abs(l - pct) < Math.abs(levels[best] - pct) ? i : best, 0);
+      const leftPct = (stepIdx / (levels.length - 1)) * 100;
+      const span = document.createElement('span');
+      span.textContent = pct + '%';
+      span.style.left = leftPct + '%';
+      axis.appendChild(span);
+    }
+  }
+  buildScrubberAxis();
+
+  const scrubberEl = document.getElementById('scrubber');
+  const scrubberValueEl = document.getElementById('scrubber-value');
+  if (scrubberEl && scrubberValueEl) {
+    scrubberEl.addEventListener('input', () => {
+      const lvl = CONFIG.INFECTION_LEVELS?.[parseInt(scrubberEl.value)] ?? 0;
+      scrubberValueEl.textContent = lvl.toFixed(1) + '% new cases';
+    });
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const zr = document.getElementById('zoom-row');
+      if (zr) zr.style.display = 'flex';
+    }, 800);
+  });
+
+  // Notify parent of content height changes (for iframe auto-sizing)
+  function postHeight() {
+    if (window.parent === window) return;
+    const h = document.body.scrollHeight;
+    window.parent.postMessage({ type: 'town-dashboard-height', height: h }, '*');
+  }
+  window.addEventListener('load', () => {
+    setTimeout(postHeight, 1500);
+    setTimeout(postHeight, 3500); // re-measure after charts render
+  });
+  const ro = new ResizeObserver(() => postHeight());
+  setTimeout(() => ro.observe(document.body), 500);
+</script>
+
+<script src="town-dashboard.js"></script>
+</body>
+</html>

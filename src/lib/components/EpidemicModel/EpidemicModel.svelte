@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from 'svelte';
 	import Controls from './Controls.svelte';
 	import Chart from './Chart.svelte';
 	import {
@@ -10,19 +11,29 @@
 		exportToCSV
 	} from './simulation.js';
 
-	// Parameters with defaults
 	let N = $state(10000);
 	let I0 = $state(10);
 	let beta = $state(0.35);
 	let gamma = $state(0.1);
 	let days = $state(365);
 
-	// Computed values
 	let data = $derived(runSIR({ N, I0, beta, gamma, days }));
 	let R0 = $derived(calculateR0(beta, gamma));
-	let herdImmunity = $derived(calculateHerdImmunity(R0));
 	let peakInfo = $derived(findPeak(data));
 	let totalInfected = $derived(calculateTotalInfected(data, N));
+
+	// ── Dashboard iframe auto-sizing ──────────────────────────
+	let iframeHeight = $state(2100);
+
+	onMount(() => {
+		function onMsg(e) {
+			if (e.data?.type === 'town-dashboard-height' && typeof e.data.height === 'number') {
+				iframeHeight = Math.min(Math.max(e.data.height + 16, 1600), 2800);
+			}
+		}
+		window.addEventListener('message', onMsg);
+		return () => window.removeEventListener('message', onMsg);
+	});
 
 	function handleExport() {
 		const csv = exportToCSV(data);
@@ -38,100 +49,109 @@
 
 <section class="epidemic-model section" id="model">
 	<div class="container">
-		<h2 class="section-title">Interactive Epidemic Model</h2>
+		<h2 class="section-title">Modeling Complex Systems</h2>
+		<p class="section-lead">
+			Epidemics aren't just biology — they're <strong>nonlinear socio-technical systems</strong>
+			driven by human behavior. People don't move through compartments like marbles through a
+			machine. They notice rising risk, weigh trade-offs, change their minds, and act on
+			incomplete information. Most classical models can't capture any of that.
+		</p>
 
-		<div class="model-intro">
+		<!-- ── SIR Baseline ──────────────────────────────────── -->
+		<div class="panel sir-panel">
+			<div class="panel-header">
+				<div>
+					<h3>Classical Baseline — SIR Model</h3>
+					<p class="panel-desc">
+						The compartmental model that's powered epidemic forecasting since 1927:
+						populations divided into Susceptible, Infected, and Recovered, governed by
+						transmission rate β and recovery rate γ. Adjust the parameters to see how
+						a homogeneous population responds.
+					</p>
+				</div>
+			</div>
+
+			<div class="sir-metrics">
+				<div class="sir-metric">
+					<span class="sir-metric-val" class:warn={R0 > 1}>{R0.toFixed(2)}</span>
+					<span class="sir-metric-lbl">R<sub>0</sub></span>
+				</div>
+				<div class="sir-metric">
+					<span class="sir-metric-val">{peakInfo.peakInfected.toLocaleString()}</span>
+					<span class="sir-metric-lbl">Peak infected</span>
+				</div>
+				<div class="sir-metric">
+					<span class="sir-metric-val">{((totalInfected / N) * 100).toFixed(0)}%</span>
+					<span class="sir-metric-lbl">Total attack rate</span>
+				</div>
+				<div class="sir-metric">
+					<span class="sir-metric-val">Day {peakInfo.peakDay}</span>
+					<span class="sir-metric-lbl">Peak timing</span>
+				</div>
+			</div>
+
+			<div class="sir-grid">
+				<div class="sir-chart-wrap">
+					<Chart {data} />
+				</div>
+				<div class="sir-controls-wrap">
+					<Controls
+						bind:N
+						bind:I0
+						bind:beta
+						bind:gamma
+						bind:days
+						onExport={handleExport}
+					/>
+				</div>
+			</div>
+		</div>
+
+		<!-- ── Bridge ────────────────────────────────────────── -->
+		<div class="bridge">
+			<div class="bridge-line"></div>
 			<p>
-				Explore how epidemics spread through populations using this interactive SIR
-				(Susceptible-Infected-Recovered) model. Adjust the parameters to see
-				how transmission rate and recovery time affect disease dynamics.
+				But humans aren't compartments. They don't transition between states based on a fixed
+				probability — they <em>decide</em>. An extrovert with kids and a service job behaves
+				nothing like a risk-averse retiree, even at identical infection levels. Capturing that
+				heterogeneity is exactly where mechanistic models break down.
 			</p>
-			<p class="model-note">
-				This relates to my research on <strong>Epidemic Modeling with Generative Agents</strong>,
-				which extends traditional compartmental models with LLM-powered agents that simulate
-				realistic human behavior.
+			<p class="bridge-question">
+				So what happens if we replace the compartments with <strong>100 LLM-powered agents</strong>,
+				each with a unique persona, deciding day-by-day whether to shelter as risk rises?
 			</p>
 		</div>
 
-		<div class="model-grid">
-			<div class="chart-section">
-				<Chart {data} />
-
-				<div class="metrics">
-					<div class="metric">
-						<span class="metric-label">R<sub>0</sub></span>
-						<span class="metric-value" class:warning={R0 > 1}>
-							{R0.toFixed(2)}
-						</span>
-						<span class="metric-hint">
-							{R0 > 1 ? 'Epidemic grows' : 'Epidemic dies out'}
-						</span>
-					</div>
-
-					<div class="metric">
-						<span class="metric-label">Peak Infected</span>
-						<span class="metric-value">
-							{peakInfo.peakInfected.toLocaleString()}
-						</span>
-						<span class="metric-hint">Day {peakInfo.peakDay}</span>
-					</div>
-
-					<div class="metric">
-						<span class="metric-label">Total Infected</span>
-						<span class="metric-value">
-							{totalInfected.toLocaleString()}
-						</span>
-						<span class="metric-hint">
-							{((totalInfected / N) * 100).toFixed(1)}% of population
-						</span>
-					</div>
-
-					<div class="metric">
-						<span class="metric-label">Herd Immunity</span>
-						<span class="metric-value">
-							{R0 > 1 ? (herdImmunity * 100).toFixed(0) + '%' : 'N/A'}
-						</span>
-						<span class="metric-hint">Threshold for containment</span>
-					</div>
+		<!-- ── GABM Experiment ─────────────────────────────────── -->
+		<div class="panel gabm-panel">
+			<div class="panel-header">
+				<div>
+					<h3>The Experiment — Dewberry Hollow GABM</h3>
+					<p class="panel-desc">
+						100 generative agents with distinct personalities probe the same question across
+						40 infection levels: <em>"Will you stay home today?"</em> Each agent was asked
+						<strong>5 times per level</strong> to measure consistency — that's why the agent
+						decisions chart shows confidence as 5/5 (unanimous) down to 3/5 (split). Scrub
+						through the levels to watch the town empty out, or click any agent to see their
+						reasoning.
+					</p>
 				</div>
+				<a
+					href="https://rossfw.github.io/GABM-Mobility-Curve/town.html"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="btn btn-secondary panel-link"
+				>
+					All 21 Models ↗
+				</a>
 			</div>
 
-			<div class="controls-section">
-				<Controls
-					bind:N
-					bind:I0
-					bind:beta
-					bind:gamma
-					bind:days
-					onExport={handleExport}
-				/>
-			</div>
-		</div>
-
-		<div class="model-explanation">
-			<h3>Understanding the Model</h3>
-			<div class="explanation-grid">
-				<div class="explanation-item">
-					<span class="compartment" style="background: #3b82f6;">S</span>
-					<div>
-						<strong>Susceptible</strong>
-						<p>People who can be infected. They move to Infected when they contact an infectious person.</p>
-					</div>
-				</div>
-				<div class="explanation-item">
-					<span class="compartment" style="background: #ef4444;">I</span>
-					<div>
-						<strong>Infected</strong>
-						<p>Infectious individuals who can spread the disease to Susceptible people.</p>
-					</div>
-				</div>
-				<div class="explanation-item">
-					<span class="compartment" style="background: #22c55e;">R</span>
-					<div>
-						<strong>Recovered</strong>
-						<p>People who have recovered and are now immune to the disease.</p>
-					</div>
-				</div>
+			<div class="iframe-wrapper" style="height: {iframeHeight}px;">
+				<iframe
+					src="/town/town.html"
+					title="Dewberry Hollow — Generative Agent-Based Model"
+					loading="lazy"
+				></iframe>
 			</div>
 		</div>
 	</div>
@@ -142,151 +162,182 @@
 		background: var(--bg-secondary);
 	}
 
-	.model-intro {
-		max-width: 800px;
-		margin-bottom: var(--space-2xl);
-	}
-
-	.model-intro p {
+	.section-lead {
+		max-width: 820px;
 		color: var(--text-secondary);
-		line-height: 1.7;
-		margin-bottom: var(--space-md);
-	}
-
-	.model-note {
-		background: var(--gradient-card);
-		border-left: 3px solid var(--accent-primary);
-		padding: var(--space-md);
-		border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-	}
-
-	.model-note strong {
-		color: var(--accent-secondary);
-	}
-
-	.model-grid {
-		display: grid;
-		grid-template-columns: 1fr 350px;
-		gap: var(--space-xl);
+		line-height: 1.75;
+		font-size: 1.02rem;
 		margin-bottom: var(--space-2xl);
 	}
 
-	.chart-section {
-		min-width: 0;
+	.section-lead strong {
+		color: var(--text-primary);
+		font-weight: 600;
 	}
 
-	.metrics {
+	/* ── Shared panel ────────────────────────────────────────── */
+	.panel {
+		background: var(--bg-card);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+		border-radius: var(--radius-md);
+		padding: var(--space-xl);
+		margin-bottom: var(--space-xl);
+	}
+
+	.panel h3 {
+		font-size: 1.05rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: var(--space-xs);
+	}
+
+	.panel-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--space-lg);
+		margin-bottom: var(--space-lg);
+	}
+
+	.panel-desc {
+		font-size: 0.9rem;
+		color: var(--text-secondary);
+		line-height: 1.65;
+		max-width: 760px;
+	}
+
+	.panel-link {
+		white-space: nowrap;
+		flex-shrink: 0;
+		font-size: 0.85rem;
+		padding: var(--space-sm) var(--space-md);
+	}
+
+	/* ── SIR panel ────────────────────────────────────────────── */
+	.sir-metrics {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
 		gap: var(--space-md);
-		margin-top: var(--space-lg);
+		margin-bottom: var(--space-lg);
 	}
 
-	.metric {
-		background: var(--bg-card);
-		border-radius: var(--radius-md);
+	.sir-metric {
+		background: var(--bg-secondary);
+		border-radius: var(--radius-sm);
 		padding: var(--space-md);
 		text-align: center;
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.06);
 	}
 
-	.metric-label {
+	.sir-metric-val {
 		display: block;
-		font-size: 0.8rem;
-		color: var(--text-secondary);
-		margin-bottom: var(--space-xs);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.metric-value {
-		display: block;
-		font-size: 1.5rem;
+		font-size: 1.4rem;
 		font-weight: 700;
 		color: var(--accent-secondary);
 		font-family: var(--font-mono);
 	}
 
-	.metric-value.warning {
-		color: var(--color-infected);
+	.sir-metric-val.warn {
+		color: #ef4444;
 	}
 
-	.metric-hint {
+	.sir-metric-lbl {
 		display: block;
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 		color: var(--text-muted);
-		margin-top: var(--space-xs);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		margin-top: 4px;
 	}
 
-	.model-explanation {
-		background: var(--bg-card);
-		border-radius: var(--radius-md);
-		padding: var(--space-xl);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	.model-explanation h3 {
-		font-size: 1.1rem;
-		margin-bottom: var(--space-lg);
-		color: var(--text-primary);
-	}
-
-	.explanation-grid {
+	.sir-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: 1fr 320px;
 		gap: var(--space-lg);
+		align-items: start;
 	}
 
-	.explanation-item {
-		display: flex;
-		gap: var(--space-md);
-	}
-
-	.compartment {
-		width: 36px;
-		height: 36px;
+	.sir-chart-wrap {
+		min-width: 0;
 		border-radius: var(--radius-sm);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 700;
-		color: white;
-		flex-shrink: 0;
+		overflow: hidden;
 	}
 
-	.explanation-item strong {
-		display: block;
-		color: var(--text-primary);
-		margin-bottom: var(--space-xs);
+	/* ── Bridge ──────────────────────────────────────────────── */
+	.bridge {
+		max-width: 820px;
+		margin: 0 auto var(--space-xl);
+		padding: var(--space-xl) var(--space-lg);
+		position: relative;
 	}
 
-	.explanation-item p {
-		font-size: 0.85rem;
+	.bridge-line {
+		position: absolute;
+		left: 50%;
+		top: 0;
+		width: 1px;
+		height: 32px;
+		background: linear-gradient(to bottom, transparent, var(--accent-secondary));
+		transform: translateX(-50%);
+	}
+
+	.bridge p {
 		color: var(--text-secondary);
-		line-height: 1.5;
+		line-height: 1.75;
+		font-size: 1rem;
+		margin-bottom: var(--space-md);
 	}
 
+	.bridge p em {
+		color: var(--accent-secondary);
+		font-style: italic;
+	}
+
+	.bridge-question {
+		color: var(--text-primary) !important;
+		font-size: 1.08rem !important;
+		font-weight: 500;
+		padding-top: var(--space-sm);
+	}
+
+	.bridge-question strong {
+		color: var(--accent-primary);
+		font-weight: 600;
+	}
+
+	/* ── GABM iframe ────────────────────────────────────────── */
+	.iframe-wrapper {
+		position: relative;
+		width: 100%;
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: #0f0f15;
+		transition: height 0.4s ease;
+	}
+
+	.iframe-wrapper iframe {
+		width: 100%;
+		height: 100%;
+		border: none;
+		display: block;
+	}
+
+	/* ── Responsive ─────────────────────────────────────────── */
 	@media (max-width: 1024px) {
-		.model-grid {
+		.sir-grid {
 			grid-template-columns: 1fr;
 		}
 
-		.controls-section {
-			order: -1;
-		}
-
-		.metrics {
+		.sir-metrics {
 			grid-template-columns: repeat(2, 1fr);
 		}
 
-		.explanation-grid {
-			grid-template-columns: 1fr;
-		}
 	}
 
-	@media (max-width: 640px) {
-		.metrics {
-			grid-template-columns: 1fr;
+	@media (max-width: 768px) {
+		.panel-header {
+			flex-direction: column;
 		}
 	}
 </style>
