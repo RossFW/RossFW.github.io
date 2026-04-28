@@ -12,7 +12,7 @@
 			Computational Modeling · Generative AI · Full-Stack Projects
 		</p>
 		<p class="description">
-			Building AI systems that model the real world: epidemic simulations,
+			Building AI systems that model the real world: simulations,
 			real-time analytics pipelines, interactive tools.
 		</p>
 		<div class="hero-buttons">
