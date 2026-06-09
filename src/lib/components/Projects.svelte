@@ -7,11 +7,10 @@
 			techStack: ['Python', 'YOLOv11', 'OpenCV', 'PyAV', 'Extended Kalman Filter', 'PnP / Homography', 'Modal', 'SQLite'],
 			features: [
 				'Fine-tuned YOLOv11 ball detection (F1 = 0.92 on held-out OOD test set)',
-				'2D pixel-space EKF + stereo 3D triangulation',
+				'Multi-agent Claude Code orchestration: 8 specialists coordinating async via file-mediated contracts',
 				'BoT-SORT persistent player tracking with pose estimation',
-				'Cloud GPU inference on Modal (T4/A10G)',
-				'Rally segmentation to SQLite analytics schema',
-				'Unified OpenCV workbench with 8 calibration/detection modes'
+				'Grounding DINO auto-labeling pipeline on Modal cloud GPUs',
+				'Cloud GPU inference on Modal (T4/A10G)'
 			],
 			highlights: [
 				{ label: 'Model', value: 'YOLOv11' },
