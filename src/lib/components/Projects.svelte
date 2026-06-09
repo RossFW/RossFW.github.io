@@ -3,10 +3,10 @@
 		{
 			title: 'PBetter — Pickleball Analytics',
 			date: 'April 2026',
-			description: 'Computer vision pipeline that turns a ZED 2 stereo camera into a full pickleball analytics system. Detects the ball frame-by-frame with a fine-tuned YOLOv8 model, tracks it in 3D with an Extended Kalman Filter, segments rallies, and writes structured analytics to SQLite — all running on cloud GPUs via Modal.',
-			techStack: ['Python', 'YOLOv8', 'OpenCV', 'Extended Kalman Filter', 'Modal', 'SQLite', 'Streamlit'],
+			description: 'Computer vision pipeline that turns a ZED 2 stereo camera into a full pickleball analytics system. Detects the ball frame-by-frame with a fine-tuned YOLOv11 model, tracks it in 3D with an Extended Kalman Filter, segments rallies, and writes structured analytics to SQLite — all running on cloud GPUs via Modal.',
+			techStack: ['Python', 'YOLOv11', 'OpenCV', 'PyAV', 'Extended Kalman Filter', 'PnP / Homography', 'Modal', 'SQLite'],
 			features: [
-				'Fine-tuned YOLOv8 ball detection (76% precision, 58% recall)',
+				'Fine-tuned YOLOv11 ball detection (F1 = 0.92 on held-out OOD test set)',
 				'2D pixel-space EKF + stereo 3D triangulation',
 				'BoT-SORT persistent player tracking with pose estimation',
 				'Cloud GPU inference on Modal (T4/A10G)',
@@ -14,12 +14,13 @@
 				'Unified OpenCV workbench with 8 calibration/detection modes'
 			],
 			highlights: [
-				{ label: 'Model', value: 'YOLOv8' },
+				{ label: 'Model', value: 'YOLOv11' },
 				{ label: 'Tracking', value: '3D EKF' },
 				{ label: 'Cloud', value: 'Modal GPU' }
 			],
 			accent: '#f472b6',
 			videoUrl: '/videos/pbetter.mp4',
+			githubUrl: 'https://github.com/RossFW/PBetter',
 		},
 		{
 			title: 'Among Us IRL',
