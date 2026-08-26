@@ -11,7 +11,7 @@
 
 <svelte:head>
 	<title>Ross Williams | Complex Systems & Computational Modeling</title>
-	<meta name="description" content="PhD Candidate at Virginia Tech researching System Dynamics, Agent-based Modeling, and Generative AI. Explore interactive epidemic models and research publications." />
+	<meta name="description" content="PhD in Industrial and Systems Engineering (Virginia Tech, 2026) working on System Dynamics, Agent-based Modeling, and Generative AI. Open to full-time roles in AI, data science, and engineering." />
 </svelte:head>
 
 <Hero />

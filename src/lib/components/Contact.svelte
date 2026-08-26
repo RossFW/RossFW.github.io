@@ -99,7 +99,7 @@
 						</span>
 						<div>
 							<span class="method-label">Status</span>
-							<span>PhD Candidate, Virginia Tech (2026)</span>
+							<span>Open to full-time roles in AI, data science, and engineering</span>
 						</div>
 					</div>
 				</div>

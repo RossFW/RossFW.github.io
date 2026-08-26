@@ -20,8 +20,8 @@
 
 			<div class="about-content">
 				<p class="lead">
-					I'm a PhD candidate in Industrial Systems Engineering at Virginia Tech,
-					graduating in May 2026. My research sits at the intersection of
+					I hold a PhD in Industrial and Systems Engineering from
+					<strong>Virginia Tech</strong> (2026), with research at the intersection of
 					<strong>complex systems</strong>, <strong>artificial intelligence</strong>,
 					and <strong>computational modeling</strong>.
 				</p>

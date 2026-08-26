@@ -23,7 +23,7 @@
 		<div class="footer-content">
 			<div class="footer-info">
 				<h3>Ross F. Williams</h3>
-				<p>PhD Candidate, Virginia Tech</p>
+				<p>PhD, Virginia Tech (2026)</p>
 				<p>System Dynamics | Agent-based Modeling | Generative AI</p>
 			</div>
 
